@@ -17,7 +17,8 @@ VALUES
     (3, 'I am going to torture my GA students today! Muwahaha.', "2014-09-17 15:01:47"),
     (1, 'If you want to link to the same action from multiple views, do not try to redirect or you will get stuck in a redirect loop.  Use a variable and render the page again.', "2014-09-17 17:01:48"),
     (1, 'Implementation of the Twilio API was quick, but cannot send to a user number without verifying through Twilio first. Freemium.', "2014-09-17 18:01:49"),
-    (1, 'Oh, no...I really need to add in the network features.  This is a really interesting mapping/joining problem.', "2014-09-17 00:01:50")
+    (1, 'Oh, no...I really need to add in the network features.  This is a really interesting mapping/joining problem.', "2014-09-17 00:01:50"),
+    (1, 'My biggest problem is that I did not have a good mental model in my head for the App class so made use of local variables instead of cookies.', "2014-09-18 16:01:50")
 ;
 
 INSERT INTO 

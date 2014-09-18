@@ -144,39 +144,6 @@ module Network
         SQL
 		end
 
-		#User login/signup.
-		def check_password(email, password)
-			password_check = @db.execute <<-SQL
-			select password, id from users where email='#{email}';
-			SQL
-			if (password == '' || password_check[0]['password'] != password)
-				return false
-			else
-				return password_check[0]['id']
-			end
-		end
-
-		def same_password?(password1, password2)
-			if (password1 == '' || password1 != password2)	
-				return false 
-			else 
-				return true 
-			end
-		end
-
-		def unique_user?(email)
-			check = @db.execute <<-SQL
-			select email from users;
-			SQL
-			i = 0 
-			for i in 0..(check.length-1) 
-				if email == check[i]['email']
-					return email
-				end
-			end
-			"Checked"
-		end
-
 	end 
 
     class App
@@ -186,11 +153,13 @@ module Network
             @my_id = 'temp' #CHANGE Do not want to store a local variable. 
         end
 
+        #RENDERING:
         def render(name, locals={})
         	file = File.read("views/"+name+".erb") 
         	Erubis::Eruby.new(file).result(locals)
         end
 
+        #DATABASE:
         def get_users()
             users = @orm.all(:users)
         end
@@ -205,6 +174,7 @@ module Network
             comments = @orm.relational_all(:comments, all_comments) #Wrap into a list of comments + commenter + status + author objects.
         end
 
+        #HELPERS:
         def select(id) 
             get_users.find {|user| user.id == id}    
         end
@@ -213,6 +183,23 @@ module Network
 			get_statuses.find{|status| status.id == id}
 		end
 
+        #User login/signup.
+        def find_user_by_email email
+            get_users.find do |user|
+                p user
+                user.email == email
+            end
+        end
+
+        def same_password?(password1, password2)
+            if (password1 == '' || password1 != password2)  
+                return false 
+            else 
+                return true 
+            end
+        end
+
+        #RACK
         def call(env)
        		ap env
             request = Rack::Request.new(env)
@@ -232,37 +219,43 @@ module Network
                     r.write render("login", {notification: notification})
 
                 when '/logout' 
-                	@my_id = 'temp'
+                	@my_id = 'temp' #CHANGE DELETE OLD WAY.
+                    r.delete_cookie 'rack.session' #Just deleting the cookie!
                 	r.redirect '/login'
 
                 when '/users/login' #post!
                 	if request.post?
-                		if @orm.unique_user?(request.POST['email']) == request.POST['email']
-	                		if @my_id = @orm.check_password(request.POST['email'], request.POST['password'])
-	                		   request.session['user_id'] = @my_id #Save this in the session area.  
-	                		   r.redirect '/index' #Once we log in you MUST go through the index page. 
-	                		else
-	                		   notification = "Password is incorrect."
-                 		 	   r.write render("login", {notification: notification})
-	                		end
-	                	else
-	                		notification = "Email is not registered."
-                 			r.write render("login", {notification: notification})
-                 		end	       
-                	end
+                        user = find_user_by_email(request.POST['email'])
 
-                when '/users/register' #post! 
+                        if user.nil? == false
+                            if user.password_is_correct?(request.POST['password']) #This is a user method!
+                                request.session['user_id'] = user.id #Saving user_id as cookie!!!
+                                r.redirect '/index' 
+                                #r.write 'OK' #DELETE TEST
+                            else
+                                notification = "Password is incorrect."
+                                r.write render("login", {notification: notification})
+                            end
+                        else
+                            notification = "No such user with that email."
+                            r.write render("login", {notification: notification})     
+                        end
+                    end
+
+                when '/users/register' 
                 	if request.post? 
-                		if (@orm.same_password?(request.POST['password2'], request.POST['password']) && @orm.unique_user?(request.POST['email']) == "Checked")
+                        user = find_user_by_email(request.POST['email'])                           
+                		if (same_password?(request.POST['password2'], request.POST['password']) && user.nil?)
+                            #Do some regex here.  Make sure nothing is nil or in wrong format.  
                 			@orm.add_user(request.POST['email'], request.POST['password'], request.POST['username'], request.POST['mobile']) 
                 			notification = "You are now registered.  Please log into user area!"
                  			r.write render("login", {notification: notification})
-                 			send_welcome(request.POST['email'], request.POST['username']) 
-                 			welcome_sms(request.POST['mobile'], request.POST['username'])
-                 		elsif @orm.unique_user?(request.POST['email']) == false
+                 			send_welcome(request.POST['email'], request.POST['username']) #MAILGUN!
+                 			welcome_sms(request.POST['mobile'], request.POST['username']) #TWILIO!
+                 		elsif user.nil? == false
                  			notification = "Email already registered. Try again!"
                  			r.write render("login", {notification: notification})
-                		elsif @orm.same_password?(request.POST['password2'], request.POST['password']) == false
+                		elsif same_password?(request.POST['password2'], request.POST['password']) == false
                 			notification = "Sorry! Passwords do not match. Try again!"
                  			r.write render("login", {notification: notification})
                  		else
@@ -272,88 +265,96 @@ module Network
 
                 #User Session pages: Should be logged in with cookies!
                 when '/index'  
-                	if @my_id !='temp'
-                    #@me = select(@my_id) #DELETE THIS LATER!!! DO NOT WANT AS INSTANCE VARIABLE!
+                	if request.session['user_id']
                     @users = get_users()  
                     @statuses = get_statuses()  
                     @comments = get_comments()
-                	r.write render("index", {users: @users, statuses: @statuses, comments: @comments, me: select(@my_id)})
+                    my_id = request.session['user_id'].to_i
+                	r.write render("index", {users: @users, statuses: @statuses, comments: @comments, me: select(my_id)})
                 	else 
                 		notification = "Please log in to see this page."
                  		r.write render("login", {notification: notification})
                 	end  
 
                 when '/home' #Newsfeed
-                	if @my_id !='temp'
-                	   r.write render("home", {users: @users, statuses: @statuses, comments: @comments, me: select(@my_id)})
+                	if request.session['user_id']
+                       my_id = request.session['user_id'].to_i
+                	   r.write render("home", {users: @users, statuses: @statuses, comments: @comments, me: select(my_id)})
                 	else 
                 		notification = "Please log in to see this page."
                  		r.write render("login", {notification: notification})
                 	end
 
                 when '/friends/' #Should be logged in! #Look at a friend's page. 
+                    if request.session['user_id']
+                    my_id = request.session['user_id'].to_i
                 	id = request.GET['friend'].to_i
-                	r.write render("friend", {friend: select(id), me: select(@my_id), users: @users, statuses: @statuses, comments: @comments})
+                	r.write render("friend", {friend: select(id), me: select(my_id), users: @users, statuses: @statuses, comments: @comments})
+                    else
+                        notification = "Please log in to see this page."
+                        r.write render("login", {notification: notification})
+                    end
 
-                #Start status CRUD. 
+                #Start status CRUD. Can't get to these if not logged in...
                 when '/status/create' 
+                    my_id = request.session['user_id'].to_i #Can I carry my_id through a redirect?  Behave differently?
                 	date = Time.now.to_s.split(' ')[0]+" " + Time.now.to_s.split(' ')[1]             
-                	@orm.add_status(@my_id, request.POST['status'], date)
+                	@orm.add_status(my_id, request.POST['status'], date)
                 	r.redirect '/index'
 
                 when '/status/show/' 
+                    my_id = request.session['user_id'].to_i
                 	id = request.GET['id'].to_i
-                	r.write render("show", {id: id, status: select_status(id), me: select(@my_id)})
+                	r.write render("show", {id: id, status: select_status(id), me: select(my_id)})
 
-                when '/status/edit/' #Should be signed in!
+                when '/status/edit/' 
+                    my_id = request.session['user_id'].to_i
                 	id = request.GET['id'].to_i #Not sure why this works with the post request.  Why is query string working?
                     status = select_status(id)
+                    if status.author_id == my_id
                     status.status = request.POST['status']
                 	@orm.update_status(status)                 	  
                 	r.redirect '/index'
+                    else #Another user can still view the edit page, but can not make changes. 
+                    notification = "You are not authorized to change this page."
+                    r.write render("login", {notification: notification})
+                    end 
 
                 when '/status/delete'
                     id = request.params['id'].to_i
                     status = select_status(id) 
+                    my_id = request.session['user_id'].to_i
+                    if status.author_id == my_id
                 	@orm.delete_status(status)
                 	r.redirect '/index' 
+                    else #Another user can still view the edit page, but can not make changes. 
+                    notification = "You are not authorized to change this page."
+                    r.write render("login", {notification: notification})
+                    end 
                 #End status CRUD. 
 
                 #Start User Settings CRUD. Change URI names? 
                 when '/about' #Edit all the user settings on this page.
-                    if @my_id !='temp'
-                    r.write render("about", {me: select(@my_id)})
+                    if request.session['user_id']
+                    my_id = request.session['user_id'].to_i
+                    r.write render("about", {me: select(my_id)})
                     else 
                         notification = "Please log in to see this page."
                         r.write render("login", {notification: notification})
                     end
                 #NOT DRY: Generalize update_me.
-                when '/about/edit' #post!   
-                    me = select(@my_id) 
+                when '/about/edit' #post!  
+                    my_id = request.session['user_id'].to_i 
+                    me = select(my_id) 
                     me.interests = request.POST['interests']
-                    @orm.update_me(me)                  
-                    r.redirect '/index'
-                when '/password/edit' #NO
-                    me = select(@my_id) 
-                    #Check here if passwords match.  
-                    me.password = request.POST['password']
-                    @orm.update_me(me)                  
-                    r.redirect '/index'
-                when '/mobile/edit' #NO
-                    me = select(@my_id) 
-                    me.mobile = request.POST['mobile']
-                    @orm.update_me(me)                  
-                    r.redirect '/index'
-                when '/username/edit' #NO
-                    me = select(@my_id) 
-                    me.username = request.POST['username']
                     @orm.update_me(me)                  
                     r.redirect '/index'
                 #End user settings CRUD.  
 
                 #TWILIO API!  
             	when '/text/create' 
-                    me = select(@my_id)
+                    my_id = request.session['user_id'].to_i
+                    me = select(my_id) 
             		send_to = request.params['send_to']
             		message = request.params['message']
             		from = me.username
@@ -363,6 +364,7 @@ module Network
 
                 #Start comments CRUD           		
             	when '/comments/create' 
+                    my_id = request.session['user_id'].to_i
             		if request.POST['comment'] == ''
             		   view = request.params['view'].to_s	
             		else   
@@ -370,12 +372,13 @@ module Network
 	            		status_id = request.params['id_to_comment'].to_i
                         friend_id = request.params['author_id'].to_i #Need this to render friend page. 
 	            		view = request.params['view'].to_s
-	            		@orm.add_comment(@my_id, status_id, request.POST['comment'], date)         
+	            		@orm.add_comment(my_id, status_id, request.POST['comment'], date)         
 	                	@comments = get_comments()
 					end
-						r.write render("#{view}", {me: select(@my_id), friend: select(friend_id), users: @users, statuses: @statuses, comments: @comments})
+						r.write render("#{view}", {me: select(my_id), friend: select(friend_id), users: @users, statuses: @statuses, comments: @comments})
 
-                when '/comments/delete' #NO
+                when '/comments/delete' #NEED TO DO.  
+                    my_id = request.session['user_id'].to_i
                     id = request.params['id'].to_i
                     #Need to know commenter, comment_id...
                     comment = select_comment(id) #Need to write this method.  
