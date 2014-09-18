@@ -341,8 +341,10 @@ module Network
             		send_to = request.params['send_to']
             		message = request.params['message']
             		from = @me.username
-            		send_sms(send_to, from, message)
-            		r.write "#{from} wants to text the message '#{message}' to #{send_to}!"
+                    send_sms(send_to, from, message)
+                    notification = "#{from} successfully sent a text message '#{message}'!"
+                    r.write render("popup", {notification: notification, me: @me})
+            		#r.write "#{from} sent a text message '#{message}' to #{send_to}!"
 
                 #Start comments CRUD           		
             	when '/comments/create' #post

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <title>Login</title>
+        <link rel='stylesheet' type = 'text/css' href="/public/style.css" />
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    </head>
+    <body>
+
+    	<ul class="nav nav-pills">
+        <li><a href="/home">Home</a></li>
+        <li><a href="/index"><%=me.username%></a></li>
+        <li><a href="/logout">Logout</a></li>
+   		</ul>
+
+        <div class="jumbotron">
+            <h1 id="jumbotron_text"></h1>
+        </div>
+        
+		<div class = "loginfeed"> 
+		        <h3><%=notification%></h3>
+		</div>
+    </body> 
+</html> 

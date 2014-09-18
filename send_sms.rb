@@ -6,14 +6,20 @@ module Network
 			@client = Twilio::REST::Client.new account_sid, auth_token
 	 
 			message = @client.account.messages.create(:body => "Welcome to the social network, #{username}!",
-			    :to => "#{send_to}",     # Replace with your phone number
-			    :from => "+18169120447")   # Replace with your Twilio number
+			    :to => "#{send_to}",    
+			    :from => "+18169120447")   
 		end	
 
 		def send_sms(send_to, from, message)
-			p send_to
+			account_sid = 'AC73a66c72f8615ee061975645ea0efafd'
+			auth_token = '3e176b8725750222d8d8b48e7a850c29'
+			@client = Twilio::REST::Client.new account_sid, auth_token
+			message = @client.account.messages.create(:body => "#{message} From:#{from} using the social network!",
+			    :to => "#{send_to}",     
+			    :from => "+18169120447") #Site admin Twilio number.  
 		end
-	#users = {"+18165171305" => "Diana Hilton"} #Send in hash. 
+		
+		#users = {"+18165171305" => "Diana Hilton"} #Send in hash. 
 		def notification_sms(users, messsage)
 			sid = "PN1af728eb3050c90a1a8c19b990622895"
 			account_sid = 'AC73a66c72f8615ee061975645ea0efafd'
