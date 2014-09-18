@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <title>Edit Status</title>
+        <link rel='stylesheet' type = 'text/css' href="/public/style.css" />
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    </head>
+    <body>
+
+    <ul class="nav nav-pills">
+        <li><a href="/home">Home</a></li>
+        <li><a href="/index"><%=me.username%></a></li>
+        <li><a href="/logout">Logout</a></li>
+    </ul>
+
+<div class="indexfeed"> 
+        <h1> Edit or delete status: </h1>
+        <div class="col-md-12">
+        <form id="edit_status" action="/status/edit/?id=<%=status.id%>" method="POST">
+            <textarea name="status" class="form-control" id="status"><%=status.status%> </textarea> <br /><br />
+            <input type="submit" class="btn btn-info" value="Edit"/><br /><br />
+        </form>
+        <form id="delete_status" action="/status/delete" method="POST">
+            <input type="hidden" name ="id" value ="<%=status.id%>">
+            <input type="submit" class="btn btn-info" value = "Delete"/><br /><br />
+        </form>
+
+        <div>
+</div>
+    </body> 
+</html>

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <title>Home</title>
+        <link rel='stylesheet' type = 'text/css' href="/public/style.css" />
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    </head>
+    <body>
+
+    <ul class="nav nav-pills">
+        <li class="active"><a href="/home">Home</a></li>
+        <li><a href="/index"><%=me.username%></a></li>
+        <li><a href="/logout">Logout</a></li>
+    </ul>
+    
+    <div class = "newsfeed"> 
+    <h1>Newsfeed</h1>
+	    <div class="row">
+	    	
+			<div class="col-md-12">
+				<%statuses.reverse.each do |status|%>
+	            <h3>
+	            	<%if status.author.id.to_s == status.author_id.to_s%>
+			        <a href="/friends/?friend=<%=status.author.id%>"> <%=status.author.username%></a>
+			        <%end%>	            
+	                <br /> <%=status.status%> <br /> 
+	                <small><%=status.date%> </small> 
+	                <br /><br />
+	                	<form id="comment" action="/comments/create" method="POST">
+	                        <input type="hidden" name ="id_to_comment" value ="<%=status.id%>">
+	                        <input type="hidden" name ="view" value ="home">
+	                        <input class="form-control" name="comment" /> <br />
+	                        <input class="btn btn-info" type="submit" value="Reply"/>
+                    	</form>
+	                <br />
+
+	                	<%comments.each do |comment|%>
+	                    <%if comment.status_id == status.id%>
+                        <br />
+                        <medium><a href="/friends/?friend=<%=comment.comment_from.id%>">
+                            <%=comment.comment_from.username%></a></medium>
+                        <br />
+                        <p><%=comment.comment%> <br /><small><%=comment.date%></small></p>
+						<%end%> 
+						<%end%>
+ 
+	            </h3> 
+	            <%end%>
+			</div>
+	    </div>
+	</div>
+
+    </body> 
+</html> 

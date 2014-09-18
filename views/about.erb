@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <title>About</title>
+        <link rel='stylesheet' type = 'text/css' href="/public/style.css" />
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    </head>
+    <body>
+
+    <ul class="nav nav-pills">
+        <li><a href="/home">Home</a></li>
+        <li><a href="/index"><%=me.username%></a></li>
+        <li><a href="/logout">Logout</a></li>
+    </ul>
+
+<div class="indexfeed"> 
+        <h1> Settings </h1>
+        <div class="col-md-6">
+            <form id="update_about" action="/about/edit" method="POST">
+                <label for="interests"> <h5>Who is <%=me.username%>?</h5></label><br />
+                <textarea class="form-control" name="interests"><%=me.interests%></textarea> <br /><br />
+                <input type="submit" class="btn btn-info"/><br /><br />
+            </form>
+
+            <form id="update_mobile" action="/mobile/edit" method="POST">
+                <label for="mobile"> <h5>Change mobile number:</h5></label><br />
+                <textarea class="form-control" name="mobile"><%=me.mobile%></textarea> <br /><br />
+                <input type="submit" class="btn btn-info"/><br /><br />
+            </form>
+
+            <form id="update_username" action="/username/edit" method="POST">
+                <label for="username"> <h5>Change username:</h5></label><br />
+                <textarea class="form-control" name="username"><%=me.username%></textarea> <br /><br />
+                <input type="submit" class="btn btn-info"/><br /><br />
+            </form>
+
+            <form id="update_password" action="/password/edit" method="POST">
+                <label for="password"> <h5>New password:</h5></label><br />
+                <input type="password" class="form-control" name="password"></input> <br /><br />
+                <label for="password"> <h5>Confirm new password:</h5></label><br />
+                <input type="password" class="form-control" name="password2"></input> <br /><br />
+                <input type="submit" class="btn btn-info"/><br /><br />
+            </form>
+
+
+
+
+        <div>
+
+
+</div>
+    </body> 
+</html>

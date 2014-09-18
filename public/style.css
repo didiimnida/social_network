@@ -1,0 +1,74 @@
+body {
+font-family: Georgia, Helvetica, sans-serif;
+color: blue;
+}
+
+h1 {
+background-color: #c9e5f2;
+padding: 8px;
+border-radius: 10px;
+font-family: Georgia, Helvetica, sans-serif;
+}
+
+h2 {
+margin: 5px;
+font-family: Georgia, Helvetica, sans-serif;
+}
+
+h3{
+margin: 20px;
+border: 5px solid #DCE0E0;
+padding: 20px;
+border-radius: 10px;
+}
+
+h4{
+border: 5px solid #DCE0E0;
+padding: 20px;	
+border-radius: 10px;
+}
+
+h5{
+padding: 2px;
+}
+
+.newsfeed{
+    margin-right: 350px;
+    margin-left: 350px;
+}
+
+.indexfeed{
+    margin-right: 200px;
+    margin-left: 200px;
+}
+
+.loginfeed{
+    margin-right: 100px;
+    margin-left: 100px;
+}
+
+
+/*Login Page: */
+#register {
+    border: 5px solid #31698a;
+    padding: 20px;
+    margin: 20px;
+    border-radius: 10px;
+}
+
+#login {
+    border: 5px solid #31698a;
+    padding: 20px;
+    margin: 20px;
+    border-radius: 10px;
+}
+
+.jumbotron {
+  background-image:url('http://cdn.clearancejobs.com/wp-content/uploads/2012/04/community-network-header.jpg');
+  height: 190px;
+}
+
+#jumbotron_text{
+	padding: 5px;	
+	background-color: transparent;
+}
