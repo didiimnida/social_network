@@ -62,6 +62,7 @@
                 <br /><small><%=status.date%></small>
                     <form id="comment" action="/comments/create" method="POST">
                         <input type="hidden" name ="id_to_comment" value ="<%=status.id%>">
+                        <input type="hidden" name ="author_id" value ="<%=status.author.id%>">
                         <input type="hidden" name ="view" value ="friend">
                         <input class="form-control" name="comment" /> <br />
                         <input class="btn btn-info" type="submit" value="Reply"/>

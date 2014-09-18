@@ -10,5 +10,9 @@ module Network
 				@interests = data['interests'] 
 				@mobile = data['mobile']
 			end
+
+			def password_is_correct? password
+				return password == @password
+			end
 	end
 end

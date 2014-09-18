@@ -103,7 +103,7 @@ module Network
         SQL
 		end
 
-		def update_me(me)
+		def update_me(me) #Only for interests right now. DRY.
 			@db.execute <<-SQL
 				UPDATE users 
 				SET interests = '#{me.interests}' 
@@ -183,7 +183,7 @@ module Network
 
         def initialize()
             @orm = ORM.new 
-            @my_id = 'temp'   
+            @my_id = 'temp' #CHANGE Do not want to store a local variable. 
         end
 
         def render(name, locals={})
@@ -191,12 +191,26 @@ module Network
         	Erubis::Eruby.new(file).result(locals)
         end
 
-        def select(id)
-            @users.find{|user| user.id == id}
+        def get_users()
+            users = @orm.all(:users)
+        end
+
+        def get_statuses()  
+            all_statuses = @orm.relational(:statuses, get_users()) #Append user objects.
+            statuses = @orm.relational_all(:statuses, all_statuses) #Wrap into a list of status + user objects.
+        end
+
+        def get_comments()
+            all_comments = @orm.relational_comments(:comments, get_statuses(), get_users()) #Append 'status + author' object list & 'user' object list to comments.             
+            comments = @orm.relational_all(:comments, all_comments) #Wrap into a list of comments + commenter + status + author objects.
+        end
+
+        def select(id) 
+            get_users.find {|user| user.id == id}    
         end
 
         def select_status(id)
-			@statuses.find{|status| status.id == id}
+			get_statuses.find{|status| status.id == id}
 		end
 
         def call(env)
@@ -209,17 +223,6 @@ module Network
         def handle_request(request)
 
             Rack::Response.new do |r|
-
-			#Want browser to remember this information. 
-			#response.set_cookie('user_id', '1')
-
-			#Use the cookie to look up user object. (Users is an array of user objects and the request.cookies is the user id based on the cookie.)
-			#user = ORM.find "users", request.cookies['user_id'].to_i
-
-			#request.session['user_id'] = user_id
-			#Using the rack.session to save.
-
-			#The user_id is now encrypted by Rack.  Rack has the deencryption.
 
                 case request.path_info
 
@@ -267,98 +270,117 @@ module Network
                 		end
                 	end
 
-                #User Session pages:
-                when '/index'  #Call all the data here b/c this page displays everything AND every logged in user must go through this page first.
+                #User Session pages: Should be logged in with cookies!
+                when '/index'  
                 	if @my_id !='temp'
-                	#Generate object list of users. 
-                	@users = @orm.all(:users)
-                	#Append the user objects to the status data.
-                	@all_statuses = @orm.relational(:statuses, @users)
-                	#Generate object list of statuses. (ORDERED!  If you get statuses out of the comment structure, won't retain order.)
-                	@statuses = @orm.relational_all(:statuses, @all_statuses)
-                	#Append the comments to the @statuses.  
-                	@all_comments = @orm.relational_comments(:comments, @statuses, @users)             
-                	@comments = @orm.relational_all(:comments, @all_comments) 
-
-                	#@friends = @orm.all(:friends) #Not using yet.
-
-                	@me = select(@my_id)
-                	r.write render("index", {users: @users, statuses: @statuses, comments: @comments, me: @me})
+                    #@me = select(@my_id) #DELETE THIS LATER!!! DO NOT WANT AS INSTANCE VARIABLE!
+                    @users = get_users()  
+                    @statuses = get_statuses()  
+                    @comments = get_comments()
+                	r.write render("index", {users: @users, statuses: @statuses, comments: @comments, me: select(@my_id)})
                 	else 
                 		notification = "Please log in to see this page."
                  		r.write render("login", {notification: notification})
                 	end  
-  
-                when '/about' #User can input information about themselves.
+
+                when '/home' #Newsfeed
                 	if @my_id !='temp'
-                	r.write render("about", {users: @users, me: @me})
+                	   r.write render("home", {users: @users, statuses: @statuses, comments: @comments, me: select(@my_id)})
                 	else 
                 		notification = "Please log in to see this page."
                  		r.write render("login", {notification: notification})
                 	end
 
-                when '/about/edit' #post! #Edit the "about" section.  
-                	@me.interests = request.POST['interests']
-                	@orm.update_me(@me)                 	
-                	r.redirect '/index'
-
-                when '/home' #Newsfeed of all users friends.
-                	if @my_id !='temp'
-                	r.write render("home", {users: @users, statuses: @statuses, comments: @comments, me: @me})
-                	else 
-                		notification = "Please log in to see this page."
-                 		r.write render("login", {notification: notification})
-                	end
-
-                when '/friends/' #Choose a particular friend to look at.  
+                when '/friends/' #Should be logged in! #Look at a friend's page. 
                 	id = request.GET['friend'].to_i
-                	@friend = select(id)
-                	r.write render("friend", {friend: @friend, me: @me, users: @users, statuses: @statuses, comments: @comments})
+                	r.write render("friend", {friend: select(id), me: select(@my_id), users: @users, statuses: @statuses, comments: @comments})
 
                 #Start status CRUD. 
-                when '/status/create'
+                when '/status/create' 
                 	date = Time.now.to_s.split(' ')[0]+" " + Time.now.to_s.split(' ')[1]             
                 	@orm.add_status(@my_id, request.POST['status'], date)
                 	r.redirect '/index'
 
-                when '/status/show/'  
-                	id = request.GET['id'].to_i  
-                	@status = select_status(id) #Status already set here, so don't need to find it again in delete method.
-                	r.write render("show", {id: id, status: @status, me: @me})
+                when '/status/show/' 
+                	id = request.GET['id'].to_i
+                	r.write render("show", {id: id, status: select_status(id), me: select(@my_id)})
 
-                when '/status/edit/' 
-                	id = request.GET['id'].to_i #Don't need this either since got status when loading the show page.
-                	@status.status = request.POST['status']
-                	@orm.update_status(@status)                 	  
+                when '/status/edit/' #Should be signed in!
+                	id = request.GET['id'].to_i #Not sure why this works with the post request.  Why is query string working?
+                    status = select_status(id)
+                    status.status = request.POST['status']
+                	@orm.update_status(status)                 	  
                 	r.redirect '/index'
 
-                when '/status/delete'  
-                	@orm.delete_status(@status)
+                when '/status/delete'
+                    id = request.params['id'].to_i
+                    status = select_status(id) 
+                	@orm.delete_status(status)
                 	r.redirect '/index' 
                 #End status CRUD. 
 
-            	when '/text/create'
+                #Start User Settings CRUD. Change URI names? 
+                when '/about' #Edit all the user settings on this page.
+                    if @my_id !='temp'
+                    r.write render("about", {me: select(@my_id)})
+                    else 
+                        notification = "Please log in to see this page."
+                        r.write render("login", {notification: notification})
+                    end
+                #NOT DRY: Generalize update_me.
+                when '/about/edit' #post!   
+                    me = select(@my_id) 
+                    me.interests = request.POST['interests']
+                    @orm.update_me(me)                  
+                    r.redirect '/index'
+                when '/password/edit' #NO
+                    me = select(@my_id) 
+                    #Check here if passwords match.  
+                    me.password = request.POST['password']
+                    @orm.update_me(me)                  
+                    r.redirect '/index'
+                when '/mobile/edit' #NO
+                    me = select(@my_id) 
+                    me.mobile = request.POST['mobile']
+                    @orm.update_me(me)                  
+                    r.redirect '/index'
+                when '/username/edit' #NO
+                    me = select(@my_id) 
+                    me.username = request.POST['username']
+                    @orm.update_me(me)                  
+                    r.redirect '/index'
+                #End user settings CRUD.  
+
+                #TWILIO API!  
+            	when '/text/create' 
+                    me = select(@my_id)
             		send_to = request.params['send_to']
             		message = request.params['message']
-            		from = @me.username
+            		from = me.username
                     send_sms(send_to, from, message)
                     notification = "#{from} successfully sent a text message '#{message}'"
-                    r.write render("popup", {notification: notification, me: @me})
-            		#r.write "#{from} sent a text message '#{message}' to #{send_to}!"
+                    r.write render("popup", {notification: notification, me: me})
 
                 #Start comments CRUD           		
-            	when '/comments/create' #post
+            	when '/comments/create' 
             		if request.POST['comment'] == ''
             		   view = request.params['view'].to_s	
             		else   
 	            		date = Time.now.to_s.split(' ')[0]+" " + Time.now.to_s.split(' ')[1]   
 	            		status_id = request.params['id_to_comment'].to_i
+                        friend_id = request.params['author_id'].to_i #Need this to render friend page. 
 	            		view = request.params['view'].to_s
-	            		@orm.add_comment(@my_id, status_id, request.POST['comment'], date)
-	            		@all_comments = @orm.relational_comments(:comments, @statuses, @users)             
-	                	@comments = @orm.relational_all(:comments, @all_comments)
+	            		@orm.add_comment(@my_id, status_id, request.POST['comment'], date)         
+	                	@comments = get_comments()
 					end
-						r.write render("#{view}", {me: @me, users: @users, friend: @friend, statuses: @statuses, comments: @comments})
+						r.write render("#{view}", {me: select(@my_id), friend: select(friend_id), users: @users, statuses: @statuses, comments: @comments})
+
+                when '/comments/delete' #NO
+                    id = request.params['id'].to_i
+                    #Need to know commenter, comment_id...
+                    comment = select_comment(id) #Need to write this method.  
+                    @orm.delete_comment(comment) #Need to write this method. 
+                    r.redirect '/index' 
                	#End comments CRUD
 
                 else 
