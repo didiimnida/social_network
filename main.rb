@@ -342,7 +342,7 @@ module Network
             		message = request.params['message']
             		from = @me.username
                     send_sms(send_to, from, message)
-                    notification = "#{from} successfully sent a text message '#{message}'!"
+                    notification = "#{from} successfully sent a text message '#{message}'"
                     r.write render("popup", {notification: notification, me: @me})
             		#r.write "#{from} sent a text message '#{message}' to #{send_to}!"
 
