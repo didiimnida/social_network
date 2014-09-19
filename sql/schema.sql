@@ -4,7 +4,8 @@ CREATE TABLE users (
     password	TEXT,
     username 	TEXT,
     interests 	TEXT,
-    mobile		VARCHAR(255)
+    mobile		VARCHAR(255), 
+    picture     TEXT
 );
 
 -- Add time stamp!

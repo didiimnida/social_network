@@ -1,10 +1,10 @@
 INSERT INTO
-    users (email, password, username, interests, mobile)
+    users (email, password, username, interests, mobile, picture)
 VALUES
-    ('diana@gmail.com', 'a', 'Diana Hilton', 'I am a web developer!', '8165171305'),
-    ('grace@gmail.com', 'a', 'Grace Hopper', 'Computer Scientist', '8165171305'),
-    ('max@gmail.com', 'a', 'Max Cantor', 'Programmer. Instructor. NYC.', '8165171305'),
-    ('albert@gmail.com', 'a', 'Albert Einstein', 'I am a physicist.', '8165171305')
+    ('diana@gmail.com', 'a', 'Diana Hilton', 'I am a web developer!', '8165171305', 'http://www.dianahilton.com/wp-content/uploads/2014/09/diana2-e1411090712935.jpg'),
+    ('grace@gmail.com', 'a', 'Grace Hopper', 'Computer Scientist', '8165171305', 'http://www.dianahilton.com/wp-content/uploads/2014/09/hopper-e1411090894202.jpg'),
+    ('max@gmail.com', 'a', 'Max Cantor', 'Programmer. Instructor. NYC.', '8165171305', 'http://www.dianahilton.com/wp-content/uploads/2014/09/max-e1411090884662.png'),
+    ('albert@gmail.com', 'a', 'Albert Einstein', 'I am a physicist.', '8165171305', 'http://www.dianahilton.com/wp-content/uploads/2014/09/biggereinstein-e1411090591720.jpg')
 ;
 
 INSERT INTO

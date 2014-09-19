@@ -25,12 +25,13 @@
 
 		<div class="col-md-4">
 
+        <img class="img-rounded" src="<%=friend.picture%>" />
+
         <h1>About </h1>
         <ul>
             <big><%=friend.interests%> </big>
         </ul>
 
-		<!-- <h1><%=friend.username.split(' ')[0]%>'s Friends</h1> -->
         <h1>Friends</h1>
         <ul>
         <%users.each do |user|%>
@@ -52,7 +53,7 @@
         </div>
 
 		<div class="col-md-8">
-		<h1><%=friend.username.split(' ')[0]%>'s Timeline</h1>
+		<h1>Timeline</h1>
             <%statuses.reverse.each do |status|%>
             <%if status.author_id == friend.id%>
 
