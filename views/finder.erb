@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <title>Friend Finder</title>
+        <link rel='stylesheet' type = 'text/css' href="/public/style.css" />
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    </head>
+    <body>
+
+    <ul class="nav nav-pills">
+        <li class="active"><a href="/home">Home</a></li>
+        <li><a href="/index"><%=me.username%></a></li>
+        <li><a href="/logout">Logout</a></li>
+    </ul>
+
+    <div class="jumbotron">
+            <h1 id="jumbotron_text"></h1>
+    </div>
+    
+    <div class = "newsfeed"> 
+    <h1>Friend Finder</h1>
+	    <div class="row">
+	    	
+			<div class="col-md-12">
+				<h1>Users</h1>
+				
+			        
+			        <%users.each do |user|%>
+			            <%if user.id != me.id%>
+			           <!--  #PUT USER FILTER HERE TO SHOW ONLY NON-FRIENDS??? -->
+			            <h3>
+			            <img class="img-rounded" style="height:100px; width:100px;" src="<%=user.picture%>">
+			            <big><%=user.username%> </big><br /> 
+			            <small><%=user.interests%></small> <br /> <br /> 
+
+			            <form id="add_friend" action="/addfriend/?friend=<%=user.id%>" method="POST">
+				        	<input type="hidden" name ="friend_id" value ="<%=user.id%>">
+				            <input class="btn btn-info" type="submit" value="Add"/>
+			        	</form>
+			            <%end%> 
+			            </h3>
+			        <%end%>
+
+			    
+			</div>
+	    </div>
+	</div>
+
+    </body> 
+</html> 

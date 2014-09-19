@@ -46,7 +46,9 @@
             <h5> <a href="/friends/?friend=<%=user.id%>"> <%=user.username%></a></h5> 
             <%end%> 
         <%end%>
-        <a href="/friends">edit</a>
+        <form id="find_friend" action="/finder" method="POST">
+            <input class="btn btn-info" type="submit" value="Find Friends"/>
+        </form>
         </ul>
 
 
@@ -67,7 +69,7 @@
 
             <h4><img style="height:50px; width:50px;" src="<%=status.author.picture%>" />
                 <medium><a href="/friends/?friend=<%=status.author.id%>"><%=status.author.username%></a></medium>
-                <br />
+                <br /><br />
                 <%=status.status%>
                 <small><a href="/status/show/?id=<%=status.id%>">edit</a></small>
                 <br />

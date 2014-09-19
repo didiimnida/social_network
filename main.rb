@@ -394,6 +394,16 @@ module Network
                     r.redirect '/index' 
                	#End comments CRUD
 
+               when '/finder'
+                    if request.session['user_id']
+                       my_id = request.session['user_id'].to_i
+                       r.write render("finder", {users: @users, statuses: @statuses, comments: @comments, me: select(my_id)})
+                    else 
+                        notification = "Please log in to see this page."
+                        r.write render("login", {notification: notification})
+                    end
+
+               #ADMIN PAGES
                when '/admin'
                     if request.session['user_id'] == @admin_id   
                        r.write render("admin", {me: select(@admin_id)})

@@ -1,10 +1,10 @@
 INSERT INTO
     users (email, password, username, interests, mobile, picture)
 VALUES
-    ('diana.hilton@gmail.com', 'a', 'Diana Hilton', 'I am a web developer!', '8165171305', 'http://www.dianahilton.com/wp-content/uploads/2014/09/diana2-e1411090712935.jpg'),
-    ('hilton.diana@live.com', 'a', 'Grace Hopper', 'Grace Hopper was an American computer scientist and United States Navy rear admiral.  A pioneer in the field, she was one of the first programmers of the Harvard Mark I computer, invented the first compiler for a computer programming language and popularized the idea of machine-independent programming languages, which led to the development of COBOL.', '8165171305', 'http://www.dianahilton.com/wp-content/uploads/2014/09/hopper-e1411090894202.jpg'),
-    ('youlynnilose@gmail.com', 'a', 'Max Cantor', 'Programmer. Instructor. ', '9259229516', 'http://www.dianahilton.com/wp-content/uploads/2014/09/max-e1411090884662.png'),
-    ('abhogiragam@gmail.com', 'a', 'Albert Einstein', 'Any intelligent fool can make things bigger, more complex, and more violent. It takes a touch of genius -- and a lot of courage -- to move in the opposite direction.', '9259229516', 'http://www.dianahilton.com/wp-content/uploads/2014/09/biggereinstein-e1411090591720.jpg')
+    ('diana@coolapp.com', 'a', 'Diana Hilton', 'Interests: Web Development -- Biophysics -- Scientific Writing -- Asian Languages -- Education -- Engineering -- Entrepreneurship', '8165171305', 'http://www.dianahilton.com/wp-content/uploads/2014/09/diana2-e1411090712935.jpg'),
+    ('grace@coolapp.com', 'a', 'Grace Hopper', 'Grace Hopper was an American computer scientist and United States Navy rear admiral.  A pioneer in the field, she was one of the first programmers of the Harvard Mark I computer, invented the first compiler for a computer programming language and popularized the idea of machine-independent programming languages, which led to the development of COBOL.', '8165171305', 'http://www.dianahilton.com/wp-content/uploads/2014/09/hopper-e1411090894202.jpg'),
+    ('max@coolapp.com', 'a', 'Max Cantor', 'Programmer. Instructor. ', '9259229516', 'http://www.dianahilton.com/wp-content/uploads/2014/09/max-e1411090884662.png'),
+    ('albert@coolapp.com', 'a', 'Albert Einstein', 'Any intelligent fool can make things bigger, more complex, and more violent. It takes a touch of genius -- and a lot of courage -- to move in the opposite direction.', '9259229516', 'http://www.dianahilton.com/wp-content/uploads/2014/09/biggereinstein-e1411090591720.jpg')
 ;
 
 INSERT INTO
