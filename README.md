@@ -7,7 +7,7 @@ This social network application will be able to login, register and authenticate
 
 Users can update a status, add/accept friends, comment on friends statuses.  
 
-Run.  From the command line, run "config".  The server will be up and running.  
+Run.  From the command line, run "rackup".  The server will be up and running.  
 
 Site admin_id is default set to user_id = 1.  To change, must alter in "main.rb" file. (Use "command-f" to search "ASSIGN ADMIN!!!" in "main.rb".) 
 
@@ -16,7 +16,7 @@ WARNING:  If you want to save the database after turning off the server, please 
 2. load_schema()
 3. load_data()
 Use "command-f" to search "COMMENT OUT TO KEEP DATABASE" in "main.rb" file.
-Note:  Will fix this in future versions once I am done testing the code and adding database features.    
+Note:  Will fix this in future versions once I am done testing the code and adding database features.  I am still testing databases right now.    
 
 Visit [Trello](https://trello.com/b/HpjBCWks/social-network) to see the planning behind the development process. 
 

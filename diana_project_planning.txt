@@ -1,0 +1,93 @@
+Social Network App. 
+
+Where to start?  
+Recreate blog app w/ Rack + Webpages.   
+Add in ORM/SQL.
+Authentication.  User registration, login, logout. 
+Add in 7 paths.
+Add in API.  
+Add in HTML/CSS.
+
+Data Model:
+
+Step 1:  User Creation and Authentication.
+As a user, I want to see a landing page where users can enter their information/login.
+As a site owner, I want to gather the following information and put it into a user object in a database (ORM).   
+As a site owner, I want to ensure the email address is unqiue/valid.  Mailgun for email verification? 
+
+User Table:
+user_ID | username | password | email         | profile_info
+1       | Diana    | iloveyou | me1@gmail.com |*other stuff* 
+2       | Hari     | fuzzybear| me2@gmail.com |*other stuff* 
+3       | Amanda   | 3Ks!dkfj2| me3@gmail.com |*other stuff*
+4       | Bethy    | tedtedte | me4@gmail.com |*other stuff* 
+5       | Sid      | craz_indi| me5@gmail.com |*other stuff* 
+6       | Sam      | 3Ks!dkfj2| me6@gmail.com |*other stuff*
+
+Note:  Need to implement authorization/user profiles.  Start with public network/blog model.
+   
+Step 1A: User Profile
+As a user, I want to be able to display "About Me" information on my page including a display name.   
+As a user, I want to be able to edit "About Me" information.
+As a user, I want to be able to delete my profile and/or "About Me" information.  
+As a site owner, I want to store the personal information in a user object while displaying it to a user page. 
+
+Step 2:  Status Updates  
+As a user, I want to be able to update a status which will be displayed/pushed to other users.
+As a user, I want to see others statuses.    
+As a user, I want to be able to SCUD my statuses.  
+As a site owner, I want to be able to relate the update to the user and display to their individual pages in order of creation.  As a site owner, I want the user_id to determine the webpage on which the status is displayed.
+As a site owner, I want to push the status updates to a public newsfeed.  (As a site owner, I will add privacy settings later.)  
+
+Status Table:
+status_ID(primary key)| author_ID (foreign)   | status 
+1                     | 1                     | *Hello this Diana's first status.*      
+2                     | 1                     | *Hello this Diana's second status.*        
+3                     | 1                     | *Hello this Diana's third status.* 
+4                     | 2                     | *Hello this Hari's first status.*      
+5                     | 2                     | *Hello this Hari's second status.*        
+6                     | 3                     | *Hello this Amanda's third status.* 
+7                     | 3                     | *Hello this Amanda's third status.* 
+
+Step 3: COMMENTING
+
+As a user, I want to be able to comment on others statuses.  
+As a site owner, I want to be able to track who comments on what.  
+        
+Comment Table:
+comment_ID (primary key) |author_ID (foreign)    | status_ID (foreign)     | comment_content       
+1                        | 2                     | 1                       | *Hari comment on Diana's first status.*  
+2                        | 2                     | 1                       | *Hari comment on Diana's first status.*
+3                        | 2                     | 3                       | *Hari comment on Diana's third status.* 
+ 
+Step 4: NETWORKING
+As a user, I want to be able to pick who I am friends with.
+As a site owner, I need to implement viewing/settings to reflect the scope of the network. 
+
+This table will store user requests. Once the connection is accepted, the connection data will be deleted from the table.    
+User Relationships: REQUESTS
+Accepter_id  | Requester_id 
+2            | 1
+3            | 1
+1            | 4
+1            | 5
+2            | 4
+2            | 5
+2            | 6
+4            | 3
+
+This table stores all friend connections once the add/accept cycle has been completed.  
+User Relationships: ACCEPTS
+User1        | User2  
+2            | 1
+3            | 1
+1            | 4
+1            | 5
+2            | 4
+2            | 5
+2            | 6
+4            | 3
+
+As a site owner, I want this to be a bidirectional relationship. 
+As a site owner, I want a friends list to appear on each user profile page as a network graph.
+https://trello.com/b/HpjBCWks/social-network
