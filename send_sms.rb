@@ -14,36 +14,28 @@ module Network
 			account_sid = 'AC73a66c72f8615ee061975645ea0efafd'
 			auth_token = '3e176b8725750222d8d8b48e7a850c29'
 			@client = Twilio::REST::Client.new account_sid, auth_token
-			message = @client.account.messages.create(:body => "#{message} From:#{from} using the social network!",
+			message = @client.account.messages.create(:body => "#{message} From: #{from} via social network!",
 			    :to => "#{send_to}",     
 			    :from => "+18169120447") #Site admin Twilio number.  
 		end
 		
-		#users = {"+18165171305" => "Diana Hilton"} #Send in hash. 
-		def notification_sms(users, messsage)
-			sid = "PN1af728eb3050c90a1a8c19b990622895"
+		#ADMIN ONLY! 
+		def notification_sms(users, message)
 			account_sid = 'AC73a66c72f8615ee061975645ea0efafd'
 			auth_token = '3e176b8725750222d8d8b48e7a850c29'
-			client = Twilio::REST::Client.new account_sid, auth_token
+			@client = Twilio::REST::Client.new account_sid, auth_token
 
-			from = "+18169120447" # Your Twilio number
-
-			users.each do |key, value|
-		    client.account.messages.create(
-		    :from => from,
+			users.each do |key, value|		    
+		    @client.account.messages.create(:from => "+18169120447",
 		    :to => key,
-		    :body => "We've made updates to the social network, #{value}!  
-		    Come back and visit us to enjoy the changes."
-	  		)
+		    :body => "Hello #{value}, #{message}")
 	  		puts "Sent message to #{value}"
 	  		end
 		end
-
-
 	end
 end
 
- 
+
 
 #Notes:
 #Can send in number with or without +1

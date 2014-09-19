@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <title>Admin</title>
+        <link rel='stylesheet' type = 'text/css' href="/public/style.css" />
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    </head>
+    <body>
+
+    <ul class="nav nav-pills">
+        <li><a href="/home">Home</a></li>
+        <li><a href="/index"><%=me.username%></a></li>
+        <li><a href="/logout">Logout</a></li>
+    </ul>
+
+    <div class="jumbotron">
+            <h1 id="jumbotron_text"></h1>
+    </div>
+
+<div class="indexfeed"> 
+        <h1> Notifications: </h1>
+        <div class="col-md-12">
+            <h4>
+            <form id="smsnotify" action="/admin/smsnotify" method="POST">
+                <label for="sms"> <h5>Send an SMS notification to all users:</h5></label><br />
+                <textarea class="form-control" name="smsnotify"> </textarea> <br /><br />
+                <input type="submit" value="SMS" class="btn btn-info"/><br /><br />
+            </form>
+            </h4>
+
+            <h4>
+            <form id="emailnotify" action="/admin/emailnotify" method="POST">
+                <label for="interests"> <h5>Send an email notification to all users:</h5></label><br />
+                <textarea class="form-control" name="emailnotify"> </textarea> <br /><br />
+                <input type="submit" value="EMAIL" class="btn btn-info"/><br /><br />
+            </form>
+            </h4>
+        <div>
+</div>
+    </body> 
+</html>

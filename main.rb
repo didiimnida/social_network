@@ -37,11 +37,11 @@ module Network
 		DB_FILE = 'socialnetwork.db'
 
 		def initialize  
-			delete_database_if_it_exists()
+			delete_database_if_it_exists() #COMMENT OUT TO KEEP DATABASE. 
 			connect_to_database()
 			configure_database()
-			load_schema()
-			load_data()
+			load_schema() #COMMENT OUT TO KEEP DATABASE. 
+			load_data() #COMMENT OUT TO KEEP DATABASE. 
 		end
 
 		def all(table)  
@@ -103,13 +103,17 @@ module Network
         SQL
 		end
 
-		def update_me(me) #Only for interests right now. DRY.
+		def update_me(me) 
 			@db.execute <<-SQL
 				UPDATE users 
-				SET interests = '#{me.interests}' 
+				SET interests = '#{me.interests}',
+                 picture = '#{me.picture}',
+                mobile = '#{me.mobile}',
+                username = '#{me.username}'
 				WHERE id = '#{me.id}';
 			SQL
 		end
+       
 
 		def add_status(author_id, status, date) 
         @db.execute <<-SQL
@@ -150,7 +154,7 @@ module Network
 
         def initialize()
             @orm = ORM.new 
-            @my_id = 'temp' #CHANGE Do not want to store a local variable. 
+            @admin_id = 1 #ASSIGN ADMIN!!!
         end
 
         #RENDERING:
@@ -250,7 +254,7 @@ module Network
                 			@orm.add_user(request.POST['email'], request.POST['password'], request.POST['username'], request.POST['mobile']) 
                 			notification = "You are now registered.  Please log into user area!"
                  			r.write render("login", {notification: notification})
-                 			send_welcome(request.POST['email'], request.POST['username']) #MAILGUN!
+                 			send_email(request.POST['email'], request.POST['username'], welcome_message()) #MAILGUN!
                  			welcome_sms(request.POST['mobile'], request.POST['username']) #TWILIO!
                  		elsif user.nil? == false
                  			notification = "Email already registered. Try again!"
@@ -342,11 +346,14 @@ module Network
                         notification = "Please log in to see this page."
                         r.write render("login", {notification: notification})
                     end
-                #NOT DRY: Generalize update_me.
-                when '/about/edit' #post!  
+                
+                when '/about/edit'  
                     my_id = request.session['user_id'].to_i 
                     me = select(my_id) 
                     me.interests = request.POST['interests']
+                    me.picture = request.POST['picture']
+                    me.mobile = request.POST['mobile']
+                    me.username = request.POST['username']
                     @orm.update_me(me)                  
                     r.redirect '/index'
                 #End user settings CRUD.  
@@ -386,6 +393,48 @@ module Network
                     @orm.delete_comment(comment) #Need to write this method. 
                     r.redirect '/index' 
                	#End comments CRUD
+
+               when '/admin'
+                    if request.session['user_id'] == @admin_id   
+                       r.write render("admin", {me: select(@admin_id)})
+                    else 
+                        notification = "You are not authorized to view this page. Login to your account again."
+                        r.write render("login", {notification: notification})
+                    end
+
+                when '/admin/smsnotify'
+                    if request.session['user_id'] == @admin_id   
+                        message = request.params['smsnotify']
+                        send_to ={}
+                        @users.each do |user|
+                            key = user.mobile
+                            value = user.username
+                            send_to[key] = value
+                        end
+                        notification_sms(send_to, message)
+                        notification = "Social network sent the follwing text message to all users: #{message}"
+                        r.write render("popup", {notification: notification, me: select(@admin_id)})
+                    else 
+                        notification = "You are not authorized to view this page. Login to your account again."
+                        r.write render("login", {notification: notification})
+                    end
+
+                when '/admin/emailnotify'
+                    if request.session['user_id'] == @admin_id
+                        message = request.params['emailnotify']
+                        send_to ={}
+                        @users.each do |user|
+                            key = user.email
+                            value = user.username
+                            send_to[key] = value
+                        end
+                        email_all_users(send_to, message)
+                        notification = "Social network the following email to all users: #{message}"
+                        r.write render("popup", {notification: notification, me: select(@admin_id)})
+                    else
+                        notification = "You are not authorized to view this page. Login to your account again."
+                        r.write render("login", {notification: notification})
+                    end
 
                 else 
                     r.write "Sorry! This is an invalid url!"
