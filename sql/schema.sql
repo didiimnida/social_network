@@ -25,11 +25,15 @@ CREATE TABLE comments (
     date 		TEXT	
 );
 
+CREATE TABLE requests (
+    id          INTEGER PRIMARY KEY,
+    requester_id INTEGER NOT NULL,
+    accepter_id  INTEGER NOT NULL
+); 
+
 CREATE TABLE friends (
 	request_id INTEGER NOT NULL,
-	accept_id  INTEGER NOT NULL,
-    FOREIGN KEY(request_id) REFERENCES users(id),
-    FOREIGN KEY(accept_id)  REFERENCES users(id)
+	accept_id  INTEGER NOT NULL
 );  
 
 --This file should only be loaded once.  It defines the instance variables

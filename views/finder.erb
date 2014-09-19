@@ -27,13 +27,14 @@
 			        
 			        <%users.each do |user|%>
 			            <%if user.id != me.id%>
-			           <!--  #PUT USER FILTER HERE TO SHOW ONLY NON-FRIENDS??? -->
+			           <!--  #PUT USER FILTER HERE TO SHOW ONLY NON-FRIENDS??? Send in a filtered list called users.--> 
+			           <!-- #PUT USER FILTER HERE TO SHOW ONLY FRIEND REQUESTS??? -->  
 			            <h3>
 			            <img class="img-rounded" style="height:100px; width:100px;" src="<%=user.picture%>">
 			            <big><%=user.username%> </big><br /> 
 			            <small><%=user.interests%></small> <br /> <br /> 
 
-			            <form id="add_friend" action="/addfriend/?friend=<%=user.id%>" method="POST">
+			            <form id="friends" action="<%=path%>" method="POST">
 				        	<input type="hidden" name ="friend_id" value ="<%=user.id%>">
 				            <input class="btn btn-info" type="submit" value="Add"/>
 			        	</form>

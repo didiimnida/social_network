@@ -35,12 +35,25 @@ VALUES
 ;
 
 INSERT INTO
+    requests (requester_id, accepter_id)
+VALUES
+    (3,4)
+;
+
+INSERT INTO
     friends (request_id, accept_id)
 VALUES
     (1,2),
+    (2,1),
     (1,3),
+    (3,1),
     (1,4),
+    (4,1),
     (2,3),
-    (2,4)
+    (3,2),
+    (2,4),
+    (4,2)
 ;
+
+
 

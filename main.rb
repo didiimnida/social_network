@@ -13,15 +13,29 @@ require_relative 'send_sms'
 require_relative 'models/users'
 require_relative 'models/status'
 require_relative 'models/comment'
+require_relative 'models/request'
 require_relative 'models/friend'
 
 module Network   
-	#Haven't done anything with this yet, so will move it later to models folder. 
+	#Haven't done anything with this yet, so will move it later to models folder.
+
+    class Request
+        attr_reader :id
+        attr_accessor  :requester_id, :accepter_id, :accepter
+        def initialize(data)
+            @requester_id = data['requester_id']
+            @accepter_id = data['accepter_id']
+            @id = data['id']
+            @accepter = data['accepter']
+        end 
+    end
+
     class Friend
-    	attr_accessor :request_id, :accept_id
+    	attr_accessor  :request_id, :accept_id, :my_friend
     	def initialize(data)
     		@request_id = data['request_id']
     		@accept_id = data['accept_id']
+            @my_friend = data['my_friend']
     	end 
     end
 
@@ -31,7 +45,8 @@ module Network
 			:users => User,
 			:statuses => Status,
 			:friends => Friend,
-			:comments => Comment
+			:comments => Comment,
+            :requests => Request
 		}
 
 		DB_FILE = 'socialnetwork.db'
@@ -113,7 +128,40 @@ module Network
 				WHERE id = '#{me.id}';
 			SQL
 		end
-       
+
+        #OK
+        def add_request(requester_id, accepter_id) 
+            @db.execute <<-SQL
+                INSERT INTO 
+                    requests (requester_id, accepter_id) 
+                VALUES
+                    ('#{requester_id}', '#{accepter_id}');
+            SQL
+        end
+
+        #Put it in both ways here OR just do two loops later?:
+        def add_friend(request_id, accept_id) 
+            @db.execute <<-SQL
+                INSERT INTO 
+                    friends (request_id, accept_id) 
+                VALUES
+                    ('#{request_id}', '#{accept_id}');
+            SQL
+            
+            @db.execute <<-SQL
+                INSERT INTO 
+                    friends (request_id, accept_id) 
+                VALUES
+                    ('#{accept_id}','#{request_id}');
+            SQL
+        end
+
+        def delete_request(request_id)
+            @db.execute <<-SQL
+                DELETE FROM requests 
+                WHERE id = '#{request_id}';
+            SQL
+        end
 
 		def add_status(author_id, status, date) 
         @db.execute <<-SQL
@@ -203,6 +251,21 @@ module Network
             end
         end
 
+        def find_friends(me)
+            @friends_simple = @orm.all(:friends)
+                    @requests_simple = @orm.all(:requests)
+                    user_friends = [] 
+                    @friends_simple.each do |connection|
+                            if connection.request_id == me.id
+                                @users.each do |user|
+                                    if connection.accept_id == user.id
+                                        user_friends.push(user)
+                                    end
+                                end
+                            end
+                        end
+        end
+
         #RACK
         def call(env)
        		ap env
@@ -218,7 +281,7 @@ module Network
                 case request.path_info
 
                 #User login/logout/register: 
-                when '/login', '/' 
+                when '/login', '/'
                 	notification = "Find Friends."
                     r.write render("login", {notification: notification})
 
@@ -268,13 +331,30 @@ module Network
                 	end
 
                 #User Session pages: Should be logged in with cookies!
-                when '/index'  
+                when '/index'   
                 	if request.session['user_id']
+                    my_id = request.session['user_id'].to_i
+                    me = select(my_id)
                     @users = get_users()  
                     @statuses = get_statuses()  
                     @comments = get_comments()
-                    my_id = request.session['user_id'].to_i
-                	r.write render("index", {users: @users, statuses: @statuses, comments: @comments, me: select(my_id)})
+                    
+                    #START Friends Filter
+                    @friends_simple = @orm.all(:friends)
+                    @requests_simple = @orm.all(:requests)
+                    user_friends = [] 
+                    @friends_simple.each do |connection|
+                            if connection.request_id == me.id
+                                @users.each do |user|
+                                    if connection.accept_id == user.id
+                                        user_friends.push(user)
+                                    end
+                                end
+                            end
+                        end
+                    #End Friends Filter             
+
+                	r.write render("index", {users: user_friends, statuses: @statuses, comments: @comments, me: me})
                 	else 
                 		notification = "Please log in to see this page."
                  		r.write render("login", {notification: notification})
@@ -283,7 +363,23 @@ module Network
                 when '/home' #Newsfeed
                 	if request.session['user_id']
                        my_id = request.session['user_id'].to_i
-                	   r.write render("home", {users: @users, statuses: @statuses, comments: @comments, me: select(my_id)})
+                       me = select(my_id)
+                       
+                       # #Start Filter Statuses
+                       #  user_friends_statuses = [] 
+                       #  @friends_simple.each do |connection|
+                       #          if connection.request_id == me.id
+                       #              @statuses.each do |status|
+                       #                  if connection.accept_id == status.author.id
+                       #                      user_friends_statuses.push(status)
+                       #                  end
+                       #              end
+                       #          end
+                       #      end
+                       #  binding.pry
+                       #  #End Filter Statuses
+
+                	   r.write render("home", {users: @users, statuses: @statuses, comments: @comments, me: me})
                 	else 
                 		notification = "Please log in to see this page."
                  		r.write render("login", {notification: notification})
@@ -397,11 +493,42 @@ module Network
                when '/finder'
                     if request.session['user_id']
                        my_id = request.session['user_id'].to_i
-                       r.write render("finder", {users: @users, statuses: @statuses, comments: @comments, me: select(my_id)})
+                       me = select(my_id)
+
+                        #START No-Friends Filter
+                        #Need to make a positive user list first, 
+                        #then take that list and compare everything on that list to one user at a time.
+                        #End Friends Filter 
+
+                       path = '/addfriend'
+                       r.write render("finder", {users: @users, me: me, path: path})
                     else 
                         notification = "Please log in to see this page."
                         r.write render("login", {notification: notification})
                     end
+
+                when '/addfriend'
+                    my_id = request.session['user_id'].to_i            
+                    @orm.add_request(my_id, request.POST['friend_id'])
+                    r.redirect '/index'
+
+                when '/accept'
+                    if request.session['user_id']
+                       my_id = request.session['user_id'].to_i
+                       path = '/acceptfriend'
+                       r.write render("finder", {users: @users, me: select(my_id), path: path}) 
+                       #Might need to make a different ERB page?  
+                    else 
+                        notification = "Please log in to see this page."
+                        r.write render("login", {notification: notification})
+                    end
+
+                when '/acceptfriend'
+                    my_id = request.session['user_id'].to_i         
+                    @orm.add_friend(my_id, request.POST['friend_id'])
+                    #Need to implement the filters?  
+                    #@orm.delete_request(request_id)
+                    r.redirect '/index'
 
                #ADMIN PAGES
                when '/admin'
