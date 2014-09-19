@@ -25,8 +25,10 @@
 				<%statuses.reverse.each do |status|%>
 	            <h3>
 	            	<%if status.author.id.to_s == status.author_id.to_s%>
+	            	<img style="height:50px; width:50px;" src="<%=status.author.picture%>" />
 			        <a href="/friends/?friend=<%=status.author.id%>"> <%=status.author.username%></a>
 			        <%end%>	            
+
 	                <br /> <%=status.status%> <br /> 
 	                <small><%=status.date%> </small> 
 	                <br /><br />
@@ -41,6 +43,7 @@
 	                	<%comments.each do |comment|%>
 	                    <%if comment.status_id == status.id%>
                         <br />
+                        <img style="height:35px; width:35px;" src="<%=comment.comment_from.picture%>" />
                         <medium><a href="/friends/?friend=<%=comment.comment_from.id%>">
                             <%=comment.comment_from.username%></a></medium>
                         <br />

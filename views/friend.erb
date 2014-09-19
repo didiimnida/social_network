@@ -58,7 +58,8 @@
             <%if status.author_id == friend.id%>
 
 
-            <h4><medium><a href="/friends/?friend=<%=status.author.id%>"><%=status.author.username%></a></medium><br />
+            <h4><img style="height:50px; width:50px;" src="<%=status.author.picture%>" />
+                <medium><a href="/friends/?friend=<%=status.author.id%>"><%=status.author.username%></a></medium><br />
                 <%=status.status%>
                 <br /><small><%=status.date%></small>
                     <form id="comment" action="/comments/create" method="POST">
@@ -72,6 +73,7 @@
                         <%comments.each do |comment|%>
                         <%if comment.status_id == status.id%>
                         <br />
+                        <img style="height:35px; width:35px;" src="<%=comment.comment_from.picture%>" />
                         <medium><a href="/friends/?friend=<%=comment.comment_from.id%>"><%=comment.comment_from.username%></a></medium>
                         <br />
                         <p><%=comment.comment%> <br /> <small><%=comment.date%></small></p>
