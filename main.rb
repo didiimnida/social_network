@@ -377,7 +377,8 @@ module Network
 					end
 						r.write render("#{view}", {me: select(my_id), friend: select(friend_id), users: @users, statuses: @statuses, comments: @comments})
 
-                when '/comments/delete' #NEED TO DO.  
+                when '/comments/delete' 
+                #NEED TO DO. User should be able to delete ALL comments and commenter should be able to delete their comment. 
                     my_id = request.session['user_id'].to_i
                     id = request.params['id'].to_i
                     #Need to know commenter, comment_id...
