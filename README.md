@@ -18,4 +18,6 @@ WARNING:  If you want to save the database after turning off the server, please 
 Use "command-f" to search "COMMENT OUT TO KEEP DATABASE" in "main.rb" file.
 Note:  Will fix this in future versions once I am done testing the code and adding database features.    
 
-Visit [Trello](https://trello.com/b/HpjBCWks/social-network) to see the planning behind the development process.   
+Visit [Trello](https://trello.com/b/HpjBCWks/social-network) to see the planning behind the development process. 
+
+Read my blog about the development process: http://www.dianahilton.com/first-web-application-scratch-4-day-journey-heart-internet/  
