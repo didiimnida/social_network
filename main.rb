@@ -17,29 +17,7 @@ require_relative 'models/request'
 require_relative 'models/friend'
 
 module Network   
-	#Haven't done anything with this yet, so will move it later to models folder.
-
-    class Request
-        attr_reader :id
-        attr_accessor  :requester_id, :accepter_id, :accepter
-        def initialize(data)
-            @requester_id = data['requester_id']
-            @accepter_id = data['accepter_id']
-            @id = data['id']
-            @accepter = data['accepter']
-        end 
-    end
-
-    class Friend
-    	attr_accessor  :request_id, :accept_id, :my_friend
-    	def initialize(data)
-    		@request_id = data['request_id']
-    		@accept_id = data['accept_id']
-            @my_friend = data['my_friend']
-    	end 
-    end
-
-	#This class will handle everything related to the database/ORM.
+	
 	class ORM 
 		TABLE_CLASS_MAP = {
 			:users => User,
@@ -211,7 +189,7 @@ module Network
         	Erubis::Eruby.new(file).result(locals)
         end
 
-        #DATABASE:
+        #DATABASE HELPERS:
         def get_users()
             users = @orm.all(:users)
         end
@@ -226,7 +204,7 @@ module Network
             comments = @orm.relational_all(:comments, all_comments) #Wrap into a list of comments + commenter + status + author objects.
         end
 
-        #HELPERS:
+        #SELECTORS:
         def select(id) 
             get_users.find {|user| user.id == id}    
         end
@@ -286,7 +264,6 @@ module Network
                     r.write render("login", {notification: notification})
 
                 when '/logout' 
-                	@my_id = 'temp' #CHANGE DELETE OLD WAY.
                     r.delete_cookie 'rack.session' #Just deleting the cookie!
                 	r.redirect '/login'
 
@@ -295,10 +272,9 @@ module Network
                         user = find_user_by_email(request.POST['email'])
 
                         if user.nil? == false
-                            if user.password_is_correct?(request.POST['password']) #This is a user method!
-                                request.session['user_id'] = user.id #Saving user_id as cookie!!!
+                            if user.password_is_correct?(request.POST['password']) 
+                                request.session['user_id'] = user.id 
                                 r.redirect '/index' 
-                                #r.write 'OK' #DELETE TEST
                             else
                                 notification = "Password is incorrect."
                                 r.write render("login", {notification: notification})
@@ -330,7 +306,7 @@ module Network
                 		end
                 	end
 
-                #User Session pages: Should be logged in with cookies!
+                #User Session pages: Should be logged in with cookies! PUT LOGIC SWITCH HERE?
                 when '/index'   
                 	if request.session['user_id']
                     my_id = request.session['user_id'].to_i
@@ -378,6 +354,7 @@ module Network
                        #      end
                        #  binding.pry
                        #  #End Filter Statuses
+                       #Need to filter statuses & comments!!!
 
                 	   r.write render("home", {users: @users, statuses: @statuses, comments: @comments, me: me})
                 	else 
@@ -389,13 +366,14 @@ module Network
                     if request.session['user_id']
                     my_id = request.session['user_id'].to_i
                 	id = request.GET['friend'].to_i
+                    #FILTER
                 	r.write render("friend", {friend: select(id), me: select(my_id), users: @users, statuses: @statuses, comments: @comments})
                     else
                         notification = "Please log in to see this page."
                         r.write render("login", {notification: notification})
                     end
 
-                #Start status CRUD. Can't get to these if not logged in...
+                #Start status CRUD. 
                 when '/status/create' 
                     my_id = request.session['user_id'].to_i #Can I carry my_id through a redirect?  Behave differently?
                 	date = Time.now.to_s.split(' ')[0]+" " + Time.now.to_s.split(' ')[1]             
@@ -499,6 +477,7 @@ module Network
                         #Need to make a positive user list first, 
                         #then take that list and compare everything on that list to one user at a time.
                         #End Friends Filter 
+                        #FILTER
 
                        path = '/addfriend'
                        r.write render("finder", {users: @users, me: me, path: path})
@@ -516,8 +495,9 @@ module Network
                     if request.session['user_id']
                        my_id = request.session['user_id'].to_i
                        path = '/acceptfriend'
+                       #FILTER
                        r.write render("finder", {users: @users, me: select(my_id), path: path}) 
-                       #Might need to make a different ERB page?  
+                       #Might need to make a different ERB page???  
                     else 
                         notification = "Please log in to see this page."
                         r.write render("login", {notification: notification})
